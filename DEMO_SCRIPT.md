@@ -2,54 +2,50 @@
 
 Total target length: under 3 minutes.
 
-## 0:00-0:20 - Problem
+## 0:00-0:20 - Learning Problem
 
-Voiceover: "In 2026, a major public university ran its first fully-online admission exam. Recall-style multiple choice scores inflated across the board. Then AI proctoring wrongly voided thousands of honest students. The lesson is simple: you cannot proctor your way out of a format where the AI simply knows the answer."
+Voiceover: "Most exams tell students right or wrong after the learning moment has already passed. Keymark turns the exam itself into the learning loop: one concept, a personal problem for every student, and instant feedback that teaches."
 
-Action: Open `http://localhost:3000`. Show the Keymark title and offline deterministic runtime badge.
+Action: Open `http://localhost:3000`. Show the product landing and the teacher/student entry points.
 
-## 0:20-0:45 - Principle
+## 0:20-0:45 - Teacher Designs The Loop
 
-Voiceover: "Keymark uses Solver-Bound Validity. The answer is valid only relative to the solver-specific instance that generated it. Every answer carries its own proof of origin."
+Voiceover: "The teacher does not write dozens of questions. They name the concept, choose a deterministic template, and author the reasoning explanation - the why - that every student should learn from."
 
-Action: Click `Run 90-second proof demo`.
+Action: Click `I'm a teacher`. Show the concept field and the required `The WHY students should learn from` box. Click `Publish learning loop` and show the join code.
 
-## 0:45-1:15 - Teacher View
+## 0:45-1:10 - Personal Instances
 
-Voiceover: "Here the teacher assigns one concept to the whole class. But each student gets a keyed instance seeded from their identity and the assignment. Same concept, different numbers, different correct answer, different proof key."
+Voiceover: "Two students join the same loop, but each receives their own seeded instance. The skill is the same; the numbers are personal."
 
-Action: Use `Next proof step` if needed until the Teacher view appears. Show Ava, Mateo, and Zara side by side. Read two different seed tags and two different correct answers.
+Action: Open a student flow with the join code. Join as Ava. Briefly show the personal seed and problem. Mention a second student can join the same code and receive different numbers.
 
-## 1:15-1:40 - Same-Answer Rejection
+## 1:10-1:45 - Feedback That Teaches
 
-Voiceover: "Here is the credibility test: what if two students get the same answer value? Keymark still rejects a transplant because the required proof key belongs to the other seed."
+Voiceover: "Now the important part: a wrong answer is not a red X. Keymark gives elaborated feedback using three questions: Feed-Up, what goal am I practicing? Feed-Back, what happened on my numbers? Feed-Forward, what should I try next?"
 
-Action: Show the same-answer panel. Read the shared answer value, the two different seed tags, and the red rejection receipt.
+Action: Submit an intentionally wrong answer, seal it, and show the feedback panel. Read the broken-step explanation using the student's numbers.
 
-## 1:40-2:05 - Copy Ring
+## 1:45-2:10 - Fresh Retry
 
-Voiceover: "Now simulate a copy ring. Every student pastes a classmate's answer. The verifier does not accuse anyone. It just runs the deterministic solver for that student's seed."
+Voiceover: "The student immediately gets a fresh variant of the same concept. This is another retrieval rep, not a reset of the lesson."
 
-Action: Click `Simulate copy ring`. Show the rejection reasons: each pasted answer is correct for another seed, not the target student's seed.
+Action: Click `Try a fresh one`. Show the new seed and changed problem.
 
-## 2:05-2:30 - Attack Harness
+## 2:10-2:35 - Mastery Moment
 
-Voiceover: "Now let an AI take it. This is an offline simulation: no model is called at runtime. The simulated AI receives the generic shared prompt and returns the correct generic answer. That answer would ace a shared exam. But submitted against Riley's keyed instance, it is rejected."
+Voiceover: "When the student passes enough fresh attempts in a row, the mastery meter fills. The message is not 'you got a score'; it is 'you proved you can do this.'"
 
-Action: Click `Run transplant attack`. Show the generic answer on the left, Riley's keyed instance on the right, and the AI attempt rejection receipt.
+Action: Submit correct sealed answers for the required attempts. Show the mastery meter and the `You proved you can do this` moment.
 
-## 2:30-2:45 - Real Solver Passes
+## 2:35-2:50 - Teacher Payoff
 
-Voiceover: "A real solver who answers Riley's actual keyed instance passes. The proof key recomputes from Riley's seed and answer. The check is arithmetic, not a guess about intent."
+Voiceover: "The teacher dashboard updates automatically: who has mastered, who needs support, how many retrieval reps happened, and which reasoning step the class is missing most. No manual grading."
 
-Action: In Student view, click `Demo-fill real answer`. Show the PASS receipt and proof key.
+Action: Return to the teacher console and show the mastery dashboard and class pattern card.
 
-## 2:45-2:55 - Build Week Use
+## 2:50-3:00 - Kicker
 
-Voiceover: "GPT-5.6 designed the Solver-Bound Validity framing, the keyed item templates, and the fingerprint scheme. Codex built the zero-dependency Node server, deterministic verifier, vanilla UI, copy-ring simulation, and attack harness."
+Voiceover: "The test just taught them. And because every answer is bound to a personal seed, copied answers fail as a side effect."
 
-Action: Briefly show the file tree or README runtime note.
-
-## 2:55-3:00 - Close
-
-Voiceover: "The Turing test asks if a machine can pass as human. Keymark asks if an answer belongs to you."
+Action: Briefly point to `See how the keying works -> /demo`.

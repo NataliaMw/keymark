@@ -7,161 +7,173 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
-    <header class="app-shell">
-      <div class="brand-row">
-        <div>
-          <p class="eyebrow">OpenAI Build Week / Education</p>
-          <h1>Keymark</h1>
-          <p class="tagline">Every answer carries its own proof of origin.</p>
-        </div>
-        <div class="runtime">
-          <span class="pulse"></span>
-          Offline deterministic runtime
-        </div>
-      </div>
-
-      <section id="demoRail" class="demo-rail">
-        <div>
-          <p class="eyebrow">Guided proof rail</p>
-          <p id="demoCaption" class="rail-caption">Step through the demo one proof at a time.</p>
-        </div>
-        <div class="rail-actions">
-          <button id="demoRailButton" class="primary">Run 90-second proof demo</button>
-          <button id="demoNextButton">Next proof step</button>
-        </div>
-      </section>
-
-      <nav class="stepper" aria-label="Demo steps">
-        <button class="step-tab active" data-step="0"><span>01</span> Problem</button>
-        <button class="step-tab" data-step="1"><span>02</span> Same Answer</button>
-        <button class="step-tab" data-step="2"><span>03</span> Teacher</button>
-        <button class="step-tab" data-step="3"><span>04</span> Attack</button>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span>Keymark</span>
+        <small>feedback and mastery</small>
+      </a>
+      <nav>
+        <a href="/demo">See how the keying works -></a>
+        <span class="runtime"><span class="pulse"></span>No runtime API</span>
       </nav>
     </header>
 
-    <main class="stage">
-      <section class="view active" data-view="0" id="problemView">
-        <div class="hero-card">
-          <p class="eyebrow">The failure mode</p>
-          <h2>Proctoring cannot fix a format where the answer is shared.</h2>
-          <p class="lede">Keymark changes the object being graded. The answer must belong to the solver's seeded instance, and the verifier checks that origin deterministically.</p>
-          <div class="claim-grid">
-            <div>
-              <span class="claim-number">0</span>
-              <p>false accusations from AI detection</p>
-            </div>
-            <div>
-              <span class="claim-number">3</span>
-              <p>deterministic templates included</p>
-            </div>
-            <div>
-              <span class="claim-number">1</span>
-              <p>local command to run the whole demo</p>
-            </div>
+    <main>
+      <section id="landingView" class="view active hero">
+        <p class="eyebrow">Learning-first keyed assessment</p>
+        <h1>One exam, a personal problem for every student.</h1>
+        <p class="lede">Instant feedback that teaches, so the test is where the learning happens.</p>
+        <div class="role-actions">
+          <button id="teacherStart" class="primary">I'm a teacher</button>
+          <button id="studentStart">I'm a student</button>
+        </div>
+        <p class="footnote">Copying resistance is a side effect: each answer is checked against that learner's seeded instance.</p>
+      </section>
+
+      <section id="teacherSetupView" class="view">
+        <button class="back-button" data-view="landingView">Back</button>
+        <div class="view-heading">
+          <p class="eyebrow">Teacher setup</p>
+          <h2>Design a learning loop, not a pile of questions.</h2>
+          <p>Name the concept, choose a deterministic template, and write the reasoning explanation students should learn from.</p>
+        </div>
+        <form id="assignmentForm" class="form-card learning-form">
+          <label>
+            Your name
+            <input id="teacherName" required value="Dr. Rivera">
+          </label>
+          <label>
+            Learning loop title
+            <input id="assignmentTitle" required value="Break-even mastery loop">
+          </label>
+          <label>
+            Concept students are practicing
+            <input id="conceptName" required value="Break-even reasoning">
+          </label>
+          <label>
+            Deterministic template
+            <select id="teacherTemplate"></select>
+          </label>
+          <label class="wide">
+            The WHY students should learn from
+            <textarea id="reasoningExplanation" required rows="5">A break-even answer is not a memorized number. Students should identify the per-unit margin, divide fixed setup cost by that margin, and round up because real kits are whole units.</textarea>
+          </label>
+          <label>
+            Mastery threshold
+            <select id="masteryThreshold">
+              <option value="2" selected>2 passes in a row</option>
+              <option value="1">1 pass</option>
+              <option value="3">3 passes in a row</option>
+            </select>
+          </label>
+          <label>
+            Expected class size
+            <input id="expectedClassSize" type="number" min="0" max="200" placeholder="Open">
+          </label>
+          <button class="primary" type="submit">Publish learning loop</button>
+        </form>
+      </section>
+
+      <section id="teacherConsoleView" class="view">
+        <div class="console-head">
+          <div>
+            <p class="eyebrow">Mastery dashboard</p>
+            <h2 id="teacherAssignmentTitle">Learning loop</h2>
+            <p id="teacherConceptLine" class="subline"></p>
+          </div>
+          <div class="join-card">
+            <span>Student join code</span>
+            <strong id="joinCode">-----</strong>
           </div>
         </div>
 
-        <section class="setup-card" aria-label="Assignment controls">
-          <label>
-            Template
-            <select id="templateSelect"></select>
-          </label>
-          <label>
-            Assignment id
-            <input id="assignmentInput" value="build-week-2026-education">
-          </label>
-          <label>
-            Class size
-            <input id="classSizeInput" type="number" min="2" max="12" value="6">
-          </label>
-          <button id="refreshButton" class="primary">Regenerate class</button>
+        <section class="board-summary">
+          <div><strong id="joinedCount">0</strong><span>learners</span></div>
+          <div><strong id="attemptCount">0</strong><span>retrieval reps</span></div>
+          <div><strong id="masteredCount">0</strong><span>mastered</span></div>
+          <div><strong id="supportCount">0</strong><span>need support</span></div>
+        </section>
+
+        <section class="miss-card">
+          <p class="eyebrow">Class pattern</p>
+          <h3 id="missingStep">No missed step yet</h3>
+          <p id="missingStepDetail">As learners submit, Keymark will surface the reasoning step that needs the most support.</p>
+        </section>
+
+        <section class="board-card">
+          <div class="board-title">
+            <div>
+              <p class="eyebrow">Live mastery board</p>
+              <h3>Who has proved the concept?</h3>
+            </div>
+            <button id="refreshBoard">Refresh board</button>
+          </div>
+          <div id="resultsBoard" class="results-board"></div>
         </section>
       </section>
 
-      <section class="view" data-view="1" id="sameAnswerSection">
+      <section id="studentJoinView" class="view">
+        <button class="back-button" data-view="landingView">Back</button>
         <div class="view-heading">
-          <p class="eyebrow">Same-answer collision proof</p>
-          <h2>Same value. Different proof keys. Transplant rejected.</h2>
-          <p>When two seeded instances collide on the same numeric answer, Keymark still requires the proof key for the target seed.</p>
-          <button id="sameAnswerButton">Refresh deterministic collision</button>
+          <p class="eyebrow">Student entry</p>
+          <h2>Start your personal version.</h2>
+          <p>Your numbers are yours. Your feedback will explain what happened on your instance.</p>
         </div>
-        <div id="sameAnswerContent" class="same-answer-content muted">Loading deterministic collision receipt.</div>
+        <form id="studentJoinForm" class="form-card">
+          <label>
+            Join code
+            <input id="studentJoinCode" required placeholder="ABCDE">
+          </label>
+          <label>
+            Your name
+            <input id="studentName" required value="Ava Chen">
+          </label>
+          <button class="primary" type="submit">Get my learning check</button>
+        </form>
       </section>
 
-      <section class="view" data-view="2" id="teacherView">
-        <div class="view-heading">
-          <p class="eyebrow">Teacher view</p>
-          <h2>One concept becomes a class of keyed instances.</h2>
-          <p>The class sees the same skill, but no shared answer key exists.</p>
-          <button id="copyRingButton" class="primary">Simulate copy ring</button>
-        </div>
-        <div id="classGrid" class="student-grid"></div>
-        <div id="copyRingResults" class="results-list"></div>
-      </section>
-
-      <section class="view" data-view="3" id="attackView">
-        <div class="view-heading">
-          <p class="eyebrow">Attack harness</p>
-          <h2>A generic AI answer is not a keyed answer.</h2>
-          <p>The simulated AI solves the unseeded/shared prompt. The target student needs the answer and proof key for their own seed.</p>
-          <button id="attackButton" class="primary">Run transplant attack</button>
-        </div>
-        <div class="attack-grid">
+      <section id="studentExamView" class="view">
+        <div class="exam-head">
           <div>
-            <h3>Generic prompt answer</h3>
-            <div id="genericAttack" class="instance-box muted">Run the harness to simulate the generic answer.</div>
+            <p class="eyebrow">Your learning check</p>
+            <h2 id="studentAssignmentTitle">Personal instance</h2>
+            <p id="studentConceptLine" class="subline"></p>
           </div>
-          <div>
-            <h3>Keyed student answer</h3>
-            <div id="targetAttack" class="instance-box muted">The target student has a different seeded instance.</div>
+          <div class="seed-pill">
+            <span>My seed</span>
+            <code id="studentSeed">----------</code>
           </div>
-        </div>
-        <div class="attack-grid verdict-grid">
-          <div id="aiAttempt" class="receipt"></div>
-          <div id="realAttempt" class="receipt"></div>
         </div>
 
-        <details class="student-drawer">
-          <summary>Manual student verifier</summary>
-          <div class="student-panel">
-            <div class="student-controls">
-              <label>
-                Name
-                <input id="studentNameInput" value="Riley Stone">
-              </label>
-              <label>
-                Student id
-                <input id="studentIdInput" value="riley-4402">
-              </label>
-              <button id="loadStudentButton">Load instance</button>
-            </div>
-            <div id="studentInstance" class="instance-box muted">Load a keyed instance to begin.</div>
-            <div class="student-controls answer-controls">
-              <label>
-                Answer
-                <input id="answerInput" placeholder="Type the answer for your instance">
-              </label>
-              <label>
-                Proof key
-                <input id="proofInput" placeholder="Click Seal answer to bind your answer to this seed">
-              </label>
-            </div>
-            <div class="button-row">
-              <button id="sealButton">Seal answer</button>
-              <button id="submitButton" class="primary">Submit to verifier</button>
-              <button id="pasteClassmateButton">Paste classmate answer</button>
-              <button id="fillCorrectButton">Demo-fill real answer</button>
-            </div>
-            <div id="verifyResult" class="receipt"></div>
+        <section class="mastery-card">
+          <div>
+            <p class="eyebrow">Mastery meter</p>
+            <h3 id="masteryText">0 of 2 passes in a row</h3>
           </div>
-        </details>
+          <div class="meter"><span id="masteryFill"></span></div>
+        </section>
+
+        <article id="studentProblem" class="problem-card"></article>
+
+        <section class="answer-card">
+          <label>
+            My answer
+            <input id="studentAnswer" placeholder="Enter your answer">
+          </label>
+          <label>
+            Proof key
+            <input id="studentProofKey" placeholder="Seal your answer before submitting">
+          </label>
+          <div class="button-row">
+            <button id="studentSeal">Seal answer</button>
+            <button id="studentSubmit" class="primary">Submit for feedback</button>
+            <button id="studentRetry">Try a fresh one</button>
+          </div>
+        </section>
+
+        <section id="feedbackPanel" class="feedback-panel"></section>
       </section>
     </main>
-
-    <footer>
-      <span>Solver-Bound Validity</span>
-      <span class="hashline">answer + seed -> proof receipt</span>
-    </footer>
 
     <script src="/app.js"></script>
   </body>

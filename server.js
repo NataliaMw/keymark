@@ -10,6 +10,7 @@ const {
   buildGenericInstance,
   publicInstance,
   verifyAnswer,
+  feedbackForSubmission,
   proofKey,
   cleanString
 } = require('./items/keyedTemplates');
@@ -30,6 +31,7 @@ const DEFAULT_CLASS = [
   ['ivy-2914', 'Ivy Park'],
   ['sam-8506', 'Sam Lewis']
 ];
+const assignments = {};
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -81,6 +83,120 @@ function requestValue(url, body, key, fallback) {
 function classRoster(count) {
   const n = Math.max(2, Math.min(12, Number(count) || 6));
   return DEFAULT_CLASS.slice(0, n).map(([studentId, studentName]) => ({ studentId, studentName }));
+}
+
+function makeCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return assignments[code] ? makeCode() : code;
+}
+
+function studentKey(name) {
+  return cleanString(name, 'Student', 80).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'student';
+}
+
+function assignmentView(assignment) {
+  return {
+    code: assignment.code,
+    title: assignment.title,
+    concept: assignment.concept,
+    reasoningExplanation: assignment.reasoningExplanation,
+    teacherName: assignment.teacherName,
+    template: templateSummaries().find(item => item.id === assignment.templateId),
+    expectedClassSize: assignment.expectedClassSize,
+    masteryThreshold: assignment.masteryThreshold,
+    retryPolicy: assignment.retryPolicy,
+    createdAt: assignment.createdAt,
+    joinUrl: `/`
+  };
+}
+
+function requireAssignment(res, code) {
+  const assignment = assignments[String(code || '').trim().toUpperCase()];
+  if (!assignment) {
+    sendJSON(res, 404, { error: 'No assignment found for that join code' });
+    return null;
+  }
+  return assignment;
+}
+
+function knownAssignmentInstances(assignment) {
+  return Object.values(assignment.students).map(student => ({
+    label: student.name,
+    instance: studentInstanceForAssignment(assignment, student)
+  }));
+}
+
+function studentInstanceForAssignment(assignment, student) {
+  return buildInstance(assignment.templateId, attemptSeed(assignment, student), student.studentId, student.name);
+}
+
+function attemptSeed(assignment, student) {
+  return `${assignment.code}:attempt:${student.currentAttempt || 1}`;
+}
+
+function productVerification(verification) {
+  const safe = { ...verification };
+  if (!safe.valid) {
+    delete safe.expectedAnswer;
+    delete safe.expectedProofKey;
+    delete safe.submittedAnswer;
+    delete safe.submittedCanonical;
+  }
+  return safe;
+}
+
+function defaultReasoning(template) {
+  if (template.id === 'break-even-lab-kits') {
+    return 'Students should learn to identify the per-unit margin, divide fixed cost by that margin, and round up because the context asks for a feasible whole quantity.';
+  }
+  if (template.id === 'sensor-cooling-rate') {
+    return 'Students should learn to transform data in the order specified by the model, keeping units attached to each operation.';
+  }
+  return 'Students should learn to track state carefully through repeated operations instead of treating a recurrence as one static calculation.';
+}
+
+function boardView(assignment) {
+  const missCounts = {};
+  const rows = Object.values(assignment.students).map(student => {
+    const instance = studentInstanceForAssignment(assignment, student);
+    const latest = student.attempts[student.attempts.length - 1] || null;
+    for (const attempt of student.attempts) {
+      if (!attempt.valid) missCounts[attempt.brokenStep] = (missCounts[attempt.brokenStep] || 0) + 1;
+    }
+    return {
+      name: student.name,
+      studentId: student.studentId,
+      seedTag: instance.seedTag,
+      joinedAt: student.joinedAt,
+      status: student.mastered ? 'MASTERED' : latest ? (latest.valid ? 'BUILDING' : 'NEEDS PRACTICE') : 'JOINED',
+      masteryLevel: Math.min(student.streak, assignment.masteryThreshold),
+      masteryTarget: assignment.masteryThreshold,
+      masteryPercent: Math.round((Math.min(student.streak, assignment.masteryThreshold) / assignment.masteryThreshold) * 100),
+      attempts: student.attempts.length,
+      currentAttempt: student.currentAttempt,
+      lastAnswer: latest && latest.answer,
+      lastStep: latest && latest.stepLabel,
+      reason: latest && latest.feedback && latest.feedback.feedBack,
+      copiedAttempt: !!(latest && latest.copySignal),
+      updatedAt: latest && latest.submittedAt
+    };
+  });
+  const missingStep = Object.entries(missCounts).sort((a, b) => b[1] - a[1])[0];
+  return {
+    assignment: assignmentView(assignment),
+    summary: {
+      joined: rows.length,
+      attempts: rows.reduce((sum, row) => sum + row.attempts, 0),
+      mastered: rows.filter(row => row.status === 'MASTERED').length,
+      needsSupport: rows.filter(row => row.status === 'NEEDS PRACTICE').length,
+      expectedClassSize: assignment.expectedClassSize
+    },
+    rows,
+    missingStep: missingStep ? { step: missingStep[0], count: missingStep[1] } : null,
+    template: templateSummaries().find(item => item.id === assignment.templateId)
+  };
 }
 
 function knownInstances(templateId, assignmentId, roster, includeGeneric) {
@@ -303,7 +419,7 @@ const server = http.createServer(async (req, res) => {
       return sendJSON(res, 200, {
         ok: true,
         app: 'Keymark',
-        tagline: 'Every answer carries its own proof of origin.',
+        tagline: 'One exam, a personal problem for every student, and instant feedback that teaches.',
         runtime: 'pure deterministic algorithms',
         openaiApiAtRuntime: false,
         templates: templateSummaries().length
@@ -312,6 +428,173 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/templates' && req.method === 'GET') {
       return sendJSON(res, 200, { templates: templateSummaries() });
+    }
+
+    if (pathname === '/api/assignments' && req.method === 'POST') {
+      const body = await readBody(req);
+      const template = getTemplate(body.templateId || DEFAULT_TEMPLATE);
+      const code = makeCode();
+      const reasoningExplanation = cleanString(body.reasoningExplanation, defaultReasoning(template), 900);
+      if (!reasoningExplanation) return sendJSON(res, 400, { error: 'Reasoning explanation is required' });
+      const assignment = {
+        code,
+        templateId: template.id,
+        title: cleanString(body.title, `${template.title} Learning Loop`, 100),
+        concept: cleanString(body.concept, template.title, 120),
+        reasoningExplanation,
+        teacherName: cleanString(body.teacherName, 'Teacher', 80),
+        expectedClassSize: Math.max(0, Math.min(200, Number(body.expectedClassSize) || 0)),
+        masteryThreshold: Math.max(1, Math.min(5, Number(body.masteryThreshold) || 2)),
+        retryPolicy: 'unlimited fresh variants',
+        students: {},
+        createdAt: Date.now()
+      };
+      assignments[code] = assignment;
+      return sendJSON(res, 201, { assignment: assignmentView(assignment), board: boardView(assignment) });
+    }
+
+    const assignmentJoinMatch = pathname.match(/^\/api\/assignments\/([A-Z0-9]{5})\/join$/);
+    if (assignmentJoinMatch && req.method === 'POST') {
+      const assignment = requireAssignment(res, assignmentJoinMatch[1]);
+      if (!assignment) return;
+      const body = await readBody(req);
+      const name = cleanString(body.name, 'Student', 80);
+      const key = studentKey(name);
+      if (!assignment.students[key]) {
+        assignment.students[key] = {
+          name,
+          studentId: key,
+          joinedAt: Date.now(),
+          currentAttempt: 1,
+          streak: 0,
+          mastered: false,
+          attempts: []
+        };
+      }
+      const student = assignment.students[key];
+      const template = getTemplate(assignment.templateId);
+      const instance = studentInstanceForAssignment(assignment, student);
+      return sendJSON(res, 200, {
+        assignment: assignmentView(assignment),
+        student: { name: student.name, studentId: student.studentId },
+        instance: publicInstance(template, instance, false),
+        mastery: {
+          streak: student.streak,
+          threshold: assignment.masteryThreshold,
+          mastered: student.mastered,
+          percent: Math.round((Math.min(student.streak, assignment.masteryThreshold) / assignment.masteryThreshold) * 100)
+        },
+        board: boardView(assignment)
+      });
+    }
+
+    const assignmentProofMatch = pathname.match(/^\/api\/assignments\/([A-Z0-9]{5})\/proof-key$/);
+    if (assignmentProofMatch && req.method === 'POST') {
+      const assignment = requireAssignment(res, assignmentProofMatch[1]);
+      if (!assignment) return;
+      const body = await readBody(req);
+      const name = cleanString(body.name, 'Student', 80);
+      const key = studentKey(name);
+      const student = assignment.students[key];
+      if (!student) return sendJSON(res, 404, { error: 'Join the assignment before sealing an answer' });
+      const template = getTemplate(assignment.templateId);
+      const instance = studentInstanceForAssignment(assignment, student);
+      const answer = cleanString(body.answer, '', 120);
+      if (!answer) return sendJSON(res, 400, { error: 'Answer is required to derive a proof key' });
+      return sendJSON(res, 200, {
+        proofKey: proofKey(template, answer, instance),
+        seedTag: instance.seedTag,
+        note: 'This seals the submitted answer to this student seed. It does not reveal whether the answer is correct.'
+      });
+    }
+
+    const assignmentSubmitMatch = pathname.match(/^\/api\/assignments\/([A-Z0-9]{5})\/submit$/);
+    if (assignmentSubmitMatch && req.method === 'POST') {
+      const assignment = requireAssignment(res, assignmentSubmitMatch[1]);
+      if (!assignment) return;
+      const body = await readBody(req);
+      const name = cleanString(body.name, 'Student', 80);
+      const key = studentKey(name);
+      const student = assignment.students[key];
+      if (!student) return sendJSON(res, 404, { error: 'Join the assignment before submitting' });
+      const template = getTemplate(assignment.templateId);
+      const instance = studentInstanceForAssignment(assignment, student);
+      const known = knownAssignmentInstances(assignment);
+      const verification = verifyAnswer(
+        template.id,
+        { answer: body.answer, proofKey: body.proofKey },
+        instance,
+        { knownInstances: known }
+      );
+      const feedback = feedbackForSubmission(
+        template.id,
+        { answer: body.answer, proofKey: body.proofKey },
+        instance,
+        verification,
+        assignment.reasoningExplanation,
+        assignment.concept
+      );
+      if (verification.valid) student.streak += 1;
+      else student.streak = 0;
+      student.mastered = student.streak >= assignment.masteryThreshold;
+      const attempt = {
+        attempt: student.currentAttempt,
+        answer: cleanString(body.answer, '', 120),
+        proofKey: cleanString(body.proofKey, '', 120),
+        valid: verification.valid,
+        verification: productVerification(verification),
+        feedback,
+        brokenStep: feedback.brokenStep,
+        stepLabel: feedback.stepLabel,
+        copySignal: !verification.valid && /proof key belongs|correct for/.test(verification.reason),
+        submittedAt: Date.now()
+      };
+      student.attempts.push(attempt);
+      return sendJSON(res, 200, {
+        assignment: assignmentView(assignment),
+        student: { name: student.name, studentId: student.studentId },
+        verification: productVerification(verification),
+        feedback,
+        mastery: {
+          streak: student.streak,
+          threshold: assignment.masteryThreshold,
+          mastered: student.mastered,
+          percent: Math.round((Math.min(student.streak, assignment.masteryThreshold) / assignment.masteryThreshold) * 100)
+        },
+        board: boardView(assignment)
+      });
+    }
+
+    const assignmentRetryMatch = pathname.match(/^\/api\/assignments\/([A-Z0-9]{5})\/retry$/);
+    if (assignmentRetryMatch && req.method === 'POST') {
+      const assignment = requireAssignment(res, assignmentRetryMatch[1]);
+      if (!assignment) return;
+      const body = await readBody(req);
+      const name = cleanString(body.name, 'Student', 80);
+      const key = studentKey(name);
+      const student = assignment.students[key];
+      if (!student) return sendJSON(res, 404, { error: 'Join the assignment before requesting a fresh variant' });
+      student.currentAttempt += 1;
+      const template = getTemplate(assignment.templateId);
+      const instance = studentInstanceForAssignment(assignment, student);
+      return sendJSON(res, 200, {
+        assignment: assignmentView(assignment),
+        student: { name: student.name, studentId: student.studentId },
+        instance: publicInstance(template, instance, false),
+        mastery: {
+          streak: student.streak,
+          threshold: assignment.masteryThreshold,
+          mastered: student.mastered,
+          percent: Math.round((Math.min(student.streak, assignment.masteryThreshold) / assignment.masteryThreshold) * 100)
+        }
+      });
+    }
+
+    const assignmentBoardMatch = pathname.match(/^\/api\/assignments\/([A-Z0-9]{5})\/board$/);
+    if (assignmentBoardMatch && req.method === 'GET') {
+      const assignment = requireAssignment(res, assignmentBoardMatch[1]);
+      if (!assignment) return;
+      return sendJSON(res, 200, boardView(assignment));
     }
 
     if (pathname === '/api/selftest' && req.method === 'GET') {
@@ -387,7 +670,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
 
-    return serveStatic(req, res, pathname);
+    return serveStatic(req, res, pathname === '/demo' || pathname === '/demo/' ? '/demo.html' : pathname);
   } catch (err) {
     return sendJSON(res, 500, { error: err.message });
   }

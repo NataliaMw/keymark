@@ -133,6 +133,48 @@ const templates = [
     },
     explanation(instance, answer) {
       return `Break-even uses setup cost divided by per-kit margin: ${instance.fixedCost} / (${instance.price} - ${instance.material}) = ${answer}.`;
+    },
+    feedback(instance, answer, valid, teacherWhy, concept) {
+      const submitted = asNumber(answer);
+      const expectedMargin = instance.price - instance.material;
+      const exactBreakEven = instance.fixedCost / expectedMargin;
+      const rounded = Math.ceil(exactBreakEven);
+      let brokenStep = 'final-check';
+      let feedback = `Your submitted value does not complete the break-even reasoning for your numbers.`;
+      let forward = `On the next fresh version, write the margin first, divide setup cost by that margin, then round up because partial kits cannot be sold.`;
+
+      if (!Number.isFinite(submitted)) {
+        brokenStep = 'answer-format';
+        feedback = `I could not read a whole-number kit count from your answer.`;
+        forward = `Submit one whole number of kits, then seal that answer before submitting.`;
+      } else if (Math.round(submitted) === expectedMargin) {
+        brokenStep = 'unit-margin';
+        feedback = `You found the per-kit margin: ${instance.price} - ${instance.material} = ${expectedMargin}. That is an intermediate step, not the number of kits needed.`;
+      } else if (Math.abs(submitted - exactBreakEven) < 0.01 && submitted !== rounded) {
+        brokenStep = 'rounding';
+        feedback = `You reached the exact break-even ratio, but the business needs a whole number of kits. Since ${exactBreakEven.toFixed(2)} is not a whole kit count, the final step is to round up.`;
+      } else if (Math.round(submitted) === Math.floor(exactBreakEven)) {
+        brokenStep = 'rounding-down';
+        feedback = `Your answer rounds down from the break-even ratio. That leaves the class short of covering the setup cost.`;
+      } else if (submitted < rounded) {
+        brokenStep = 'division-or-margin';
+        feedback = `Your count is too low for this setup cost and margin. The margin must be based on your instance: selling price ${instance.price} minus cost ${instance.material}.`;
+      } else {
+        brokenStep = 'division-or-overestimate';
+        feedback = `Your count is higher than the minimum needed. The goal is the minimum whole kit count after dividing setup cost by margin.`;
+      }
+
+      return {
+        feedUp: `${concept}: use contribution margin to decide the minimum whole number of kits needed to cover fixed setup cost.`,
+        feedBack: valid
+          ? `You proved the loop on your numbers. ${teacherWhy}`
+          : `${feedback} Teacher why: ${teacherWhy}`,
+        feedForward: valid
+          ? `Try explaining the margin and rounding step in one sentence; that is the transferable skill.`
+          : forward,
+        brokenStep,
+        stepLabel: brokenStep === 'unit-margin' ? 'Found margin but stopped early' : brokenStep === 'rounding' || brokenStep === 'rounding-down' ? 'Rounding to a feasible whole unit' : 'Set up and divide by margin'
+      };
     }
   },
   {
@@ -190,6 +232,29 @@ const templates = [
     },
     explanation(instance, answer) {
       return `Cooling index is ${instance.dropTenths} tenths C * ${instance.circulationRate} plus calibration ${instance.calibrationOffset}, which equals ${Math.round(Number(answer))}.`;
+    },
+    feedback(instance, answer, valid, teacherWhy, concept) {
+      const submitted = asNumber(answer);
+      const drop = Math.round((instance.startTemp - instance.endTemp) * 10);
+      let brokenStep = 'calibrated-index';
+      let feedback = `The calibrated index combines three pieces from your instance: temperature drop in tenths, circulation rate, and calibration offset.`;
+      if (!Number.isFinite(submitted)) {
+        brokenStep = 'answer-format';
+        feedback = `I could not read a whole-number index from your answer.`;
+      } else if (Math.round(submitted) === drop) {
+        brokenStep = 'temperature-drop';
+        feedback = `You appear to have found the temperature drop in tenths (${drop}), but the index also multiplies by circulation rate and applies the calibration.`;
+      } else if (Math.round(submitted) === drop * instance.circulationRate) {
+        brokenStep = 'calibration-offset';
+        feedback = `You multiplied the drop by the circulation rate, but the calibrated instrument also applies this instance's offset.`;
+      }
+      return {
+        feedUp: `${concept}: translate a data record into a calibrated index by following the defined operations in order.`,
+        feedBack: valid ? `You followed the data transformation for your sensor record. ${teacherWhy}` : `${feedback} Teacher why: ${teacherWhy}`,
+        feedForward: valid ? `Name the three operations in order: drop, scale, calibrate.` : `On the retry, annotate each number before calculating: drop in tenths, circulation multiplier, then calibration adjustment.`,
+        brokenStep,
+        stepLabel: brokenStep === 'temperature-drop' ? 'Stopped at raw drop' : brokenStep === 'calibration-offset' ? 'Missed calibration' : 'Follow the full transformation'
+      };
     }
   },
   {
@@ -239,6 +304,19 @@ const templates = [
     },
     explanation(instance, answer) {
       return `Iterating ${instance.cycles} keyed cycles from ${String(instance.start).padStart(8, '0')} gives final display ${String(answer).padStart(8, '0')}.`;
+    },
+    feedback(instance, answer, valid, teacherWhy, concept) {
+      return {
+        feedUp: `${concept}: apply a recurrence repeatedly and keep only the last eight digits after each cycle.`,
+        feedBack: valid
+          ? `You maintained the recurrence state across all ${instance.cycles} cycles. ${teacherWhy}`
+          : `This answer does not match the final display produced by your recurrence. The most common break is applying the last-eight-digits rule only at the end instead of after every cycle. Teacher why: ${teacherWhy}`,
+        feedForward: valid
+          ? `For transfer, write one cycle as: new display = last8(old * multiplier + add).`
+          : `On the retry, make a small table with one row per cycle and trim to eight digits after each row.`,
+        brokenStep: valid ? 'complete' : 'recurrence-iteration',
+        stepLabel: valid ? 'Completed recurrence' : 'Iterate and trim each cycle'
+      };
     }
   }
 ];
@@ -355,6 +433,25 @@ function verifyAnswer(templateId, submittedAnswer, targetInstance, opts) {
   };
 }
 
+function feedbackForSubmission(templateId, submittedAnswer, instance, verification, teacherWhy, concept) {
+  const template = getTemplate(templateId);
+  const answerText = typeof submittedAnswer === 'object' && submittedAnswer !== null && 'answer' in submittedAnswer
+    ? submittedAnswer.answer
+    : submittedAnswer;
+  const why = cleanString(teacherWhy, 'This concept matters because the reasoning transfers to new numbers, not just this one answer.', 900);
+  const conceptName = cleanString(concept, template.title, 120);
+  if (typeof template.feedback === 'function') {
+    return template.feedback(instance, answerText, !!(verification && verification.valid), why, conceptName);
+  }
+  return {
+    feedUp: `${conceptName}: apply the stated rule to your seeded instance.`,
+    feedBack: verification && verification.valid ? `Your answer matched your keyed instance. ${why}` : `Your answer did not match the deterministic check for this seeded instance. ${why}`,
+    feedForward: verification && verification.valid ? 'Explain the method in your own words.' : 'Try a fresh version and write each operation before calculating.',
+    brokenStep: verification && verification.valid ? 'complete' : 'principle',
+    stepLabel: verification && verification.valid ? 'Complete' : 'Review the principle'
+  };
+}
+
 module.exports = {
   templates,
   templateSummaries,
@@ -363,6 +460,7 @@ module.exports = {
   buildGenericInstance,
   publicInstance,
   verifyAnswer,
+  feedbackForSubmission,
   proofKey,
   clone,
   cleanString

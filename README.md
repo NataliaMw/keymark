@@ -1,16 +1,27 @@
 # Keymark
 
-Every answer carries its own proof of origin.
+One exam, a personal problem for every student, and instant feedback that teaches - so the test is where the learning happens.
 
-Keymark is a zero-dependency assessment prototype for OpenAI Build Week, Education track. It implements the **Solver-Bound Validity** principle from [CONCEPT.md](./CONCEPT.md): an assessment answer is valid only relative to the solver-specific instance that generated it; a transplanted answer is deterministically invalid.
+Keymark is a zero-dependency feedback-and-mastery engine for OpenAI Build Week, Education track. It uses the **Solver-Bound Validity** principle from [CONCEPT.md](./CONCEPT.md): an answer is valid only relative to the solver-specific instance that generated it.
 
 ## What It Is
 
-Keymark makes copying structurally fail. A teacher picks an item template and assignment id. Each student receives the same conceptual task, but the concrete numbers are seeded from `studentId + assignmentId + templateId`. The correct answer carries a proof key derived from that student's instance. A classmate's answer, or a generic AI answer to the shared problem, fails the verifier because the submitted proof key does not bind to the target seed.
+Keymark lets a teacher turn one concept into a learning loop. The teacher names the concept, chooses a deterministic template, and authors the "why" explanation students should learn from. Each student receives a personal seeded instance, submits an answer, and gets elaborated feedback structured around:
 
-There is no proctoring, no surveillance, no AI detector, no oral exam, and no probabilistic accusation. The check is arithmetic.
+- **Feed-Up**: what concept or skill this checks.
+- **Feed-Back**: what happened on this student's specific numbers.
+- **Feed-Forward**: what to try next on a fresh variant.
 
-The motivation is a 2026 online admissions-exam failure pattern: recall-heavy multiple choice inflated across the board, while AI proctoring wrongly voided thousands of honest students. Keymark does not try to proctor its way out of an answer format an AI can already know. It changes the format so the answer must belong to the solver's keyed instance.
+Students retry fresh variants until they meet the mastery threshold. The teacher dashboard shows mastery level, attempts, and the reasoning step the class is missing most - with zero manual grading.
+
+Copying resistance is a side effect: a transplanted answer fails because the proof key does not bind to the student's seeded instance.
+
+## Evidence Behind The Product
+
+- Elaborated feedback that explains reasoning is far stronger than a bare right/wrong verdict: Van der Kleij et al. 2015 report about `d=0.99` for elaborated feedback vs `d=0.05` for simple verification, and Wisniewski/Hattie 2020 reinforce feedback as most useful when it answers where the learner is going, how they are going, and what comes next.
+- Testing and generation effects are reliable learning mechanisms, with effects around `g=0.50` in synthesis-level findings.
+- Personalized feedback can raise learner motivation; Wang 2026 reports `g=0.82`.
+- Mastery retry with fresh variants has shown real assessment gains; Morphew 2020 reports final-exam scores about `+7` points higher.
 
 ## Solver-Bound Validity
 
@@ -22,14 +33,13 @@ Each item template implements:
 - `solve(instance)`: compute the reference answer for that instance.
 - `fingerprint(answer, instance)`: derive a cheap proof key from the answer and instance.
 - `verify(submittedAnswer, instance)`: accept only if the answer satisfies the deterministic solver for that exact seed and the submitted proof key equals the proof key derived from that same seed and correct answer.
+- `feedback(instance, answer, valid, teacherWhy, concept)`: generate deterministic elaborated feedback for the student's instance.
 
 The shipped templates cover:
 
-- Math / quantitative: break-even lab kits.
-- Science / data: calibrated cooling index from seeded sensor readings.
-- Logic / quantitative reasoning: eight-digit recurrence lock.
-
-The answer spaces are deliberately wide. `node selftest.js` generates 200 seeded instances per template and requires the duplicate-answer collision rate to stay below 2%. It also proves that a value-collision transplant still fails when the proof key belongs to another seed.
+- Math / quantitative: break-even lab kits, with step-level diagnosis.
+- Science / data: calibrated cooling index, with principle-level diagnosis.
+- Logic / quantitative reasoning: eight-digit recurrence lock, with principle-level diagnosis.
 
 ## Prior Art
 
@@ -37,32 +47,33 @@ These citations and contrasts are drawn from [CONCEPT.md](./CONCEPT.md):
 
 - Turing, "Computing Machinery and Intelligence" (1950): frames intelligence as indistinguishable imitation; Keymark rejects imitation detection and verifies answer-instance origin by construction.
 - Automatic Item Generation / isomorphic items: psychometrics already generates structurally equivalent item families; Keymark makes the variant identity-bound and self-verifying.
-- PrairieLearn / randomized question generators: randomized parameters plus automated grading are proven instructional patterns; Keymark sharpens them into an anti-transplant property tied to the solver.
-- CodeRunner / executable grading: deterministic programmatic grading is valuable; Keymark extends determinism to provenance of the answer-instance match.
+- PrairieLearn / randomized question generators: randomized parameters plus automated grading are proven instructional patterns; Keymark uses the same determinism for instant feedback and mastery loops.
+- CodeRunner / executable grading: deterministic programmatic grading is valuable; Keymark extends determinism to provenance of the answer-instance match and feedback.
 - Commitment schemes / zero-knowledge: Keymark is not cryptography, but borrows the binding and proof intuition for a simpler educational check.
 - Canary tokens / honeytokens: unique embedded tripwires reveal misuse; Keymark embeds a per-instance fingerprint for deterministic validation.
 
 ## Honest Limitation
 
-A determined student can still succeed by having another person or AI solve their exact keyed instance; the method prevents answer transplantation, not unauthorized assistance on the correct instance.
+Deterministic checks fit verifiable-answer concepts: quantitative reasoning, data transformations, recurrence logic, and similar domains. Open-ended essays and subjective work are out of scope for this prototype. A determined student can still succeed by having another person or AI solve their exact keyed instance; answer-transplant resistance is a side effect, not the main product promise.
 
 ## Runtime Model
 
 The runtime uses **no OpenAI API, no API key, no network call, and no npm dependency**. The product is pure deterministic JavaScript:
 
 - `server.js`: plain Node `http` server and API routes.
-- `items/keyedTemplates.js`: deterministic item templates, solvers, fingerprinting, and verifier.
-- `public/index.html`, `public/app.js`, `public/style.css`: vanilla browser client.
+- `items/keyedTemplates.js`: deterministic item templates, solvers, fingerprinting, verifier, and feedback helpers.
+- `public/index.html`, `public/app.js`, `public/style.css`: product client at `/`.
+- `public/demo.html`, `public/demo-app.js`, `public/demo-style.css`: mechanism explainer at `/demo`.
 
 GPT-5.6 and Codex are used offline to design and build the submission. They are not required when the app runs.
 
 ## How GPT-5.6 Was Used
 
-GPT-5.6 was used offline to design the Solver-Bound Validity framing, author the keyed item-template concept, and shape the answer fingerprint scheme. Its role is intellectual and authoring support, not runtime execution.
+GPT-5.6 was used offline to design the Solver-Bound Validity framing, draft the keyed item templates, and draft reasoning explanations and feedback structure. Its role is intellectual and authoring support, not runtime execution.
 
 ## How Codex Was Used
 
-Codex built the zero-dependency server, deterministic verifier, vanilla UI, copy-ring simulation, attack harness, README, demo script, and license. Key implementation decisions were to keep instance generation stateless, recompute all seeds on demand, and make transplant rejection reasons explain which seeded instance the copied answer belongs to.
+Codex built the zero-dependency server, deterministic verifier integration, feedback and mastery endpoints, product UI, teacher dashboard, student retry flow, `/demo` explainer preservation, README, demo script, and license.
 
 ## How To Run
 
@@ -70,16 +81,16 @@ Codex built the zero-dependency server, deterministic verifier, vanilla UI, copy
 node server.js
 ```
 
-Open:
+Product:
 
 ```text
 http://localhost:3000
 ```
 
-Health check:
+Mechanism explainer:
 
 ```text
-http://localhost:3000/api/health
+http://localhost:3000/demo
 ```
 
 Self-test:
@@ -88,28 +99,39 @@ Self-test:
 node selftest.js
 ```
 
-Browser-readable self-test:
+Health check:
 
 ```text
-http://localhost:3000/api/selftest
+http://localhost:3000/api/health
 ```
 
-Same-answer rejection proof:
+## How To Use It
 
-```text
-http://localhost:3000/api/same-answer
-```
+Teacher flow:
 
-## Demo Flow
+1. Open `/`.
+2. Click `I'm a teacher`.
+3. Enter teacher name, learning loop title, concept, template, reasoning explanation, mastery threshold, and optional class size.
+4. Click `Publish learning loop`.
+5. Share the join code.
+6. Watch the mastery dashboard: learners, retrieval reps, mastered count, support count, missed-step pattern, and per-student progress.
 
-1. Open the app and keep the default assignment id.
+Student flow:
+
+1. Open `/`.
+2. Click `I'm a student`.
+3. Enter join code and name.
+4. Solve the personal instance.
+5. Enter an answer, click `Seal answer`, then click `Submit for feedback`.
+6. Read Feed-Up, Feed-Back, and Feed-Forward.
+7. If needed, click `Try a fresh one` for another retrieval rep.
+8. Keep going until the mastery meter says `You proved you can do this`.
+
+Mechanism demo:
+
+1. Open `/demo`.
 2. Click `Run 90-second proof demo`.
-3. Step 1 shows the problem claim: shared-answer exams are the wrong verification target.
-4. Step 2 highlights the same-answer rejection panel: two students share the same answer value, but the transplanted proof key is rejected.
-5. Step 3 shows the teacher class and runs the copy ring: every transplanted classmate answer is rejected with a deterministic reason.
-6. Step 4 runs the attack harness: the simulated generic AI answer is rejected while the real keyed solver passes.
-7. In Student view, type an answer manually, click `Seal answer`, then submit to see answer-plus-proof verification.
-8. Click `Demo-fill real answer` to show a passing keyed submission.
+3. Watch the seeded-instance, same-answer, copy-ring, and generic-answer transplant demonstrations.
 
 ## Tech Stack
 
