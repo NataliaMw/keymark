@@ -38,6 +38,8 @@ const els = {
   aiAttempt: document.querySelector('#aiAttempt'),
   realAttempt: document.querySelector('#realAttempt')
 };
+els.stepTabs = [...document.querySelectorAll('.step-tab')];
+els.views = [...document.querySelectorAll('.view')];
 
 function escapeHTML(value) {
   return String(value == null ? '' : value)
@@ -69,6 +71,14 @@ function classCount() {
 
 function statusClass(valid) {
   return valid ? 'pass' : 'fail';
+}
+
+function showView(index) {
+  const next = Math.max(0, Math.min(els.views.length - 1, Number(index) || 0));
+  els.views.forEach(view => view.classList.toggle('active', Number(view.dataset.view) === next));
+  els.stepTabs.forEach(tab => tab.classList.toggle('active', Number(tab.dataset.step) === next));
+  state.activeView = next;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderInstanceBox(instance, solution) {
@@ -304,41 +314,44 @@ async function runAttack() {
 }
 
 function setDemoFocus(element) {
-  document.querySelectorAll('.demo-focus').forEach(node => node.classList.remove('demo-focus'));
   if (element) {
-    element.classList.add('demo-focus');
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    element.classList.add('demo-pulse');
+    setTimeout(() => element.classList.remove('demo-pulse'), 1200);
   }
 }
 
 async function runDemoStep(index) {
   const steps = [
     {
-      caption: '1/4 Same concept, different keyed instances. Notice every student has a different seed, prompt, answer, and proof key.',
+      caption: '1/4 Problem. Shared-answer exams make copying and generic AI answers look valid; Keymark changes the object being verified.',
       action: async () => {
-        await loadClass();
-        setDemoFocus(document.querySelector('.teacher-panel'));
+        showView(0);
+        setDemoFocus(document.querySelector('#problemView'));
       }
     },
     {
       caption: '2/4 Collision defense. Even when two students have the same answer value, the wrong seed proof key is rejected.',
       action: async () => {
         await loadSameAnswer();
+        showView(1);
         setDemoFocus(els.sameAnswerSection);
       }
     },
     {
-      caption: '3/4 Copy ring. Every transplanted classmate answer fails deterministic verification.',
+      caption: '3/4 Teacher view. Same concept, different keyed instances; then the copy ring shows every transplanted answer rejected.',
       action: async () => {
+        await loadClass();
         await runCopyRing();
-        setDemoFocus(document.querySelector('.teacher-panel'));
+        showView(2);
+        setDemoFocus(document.querySelector('#teacherView'));
       }
     },
     {
       caption: "4/4 Attack harness. The generic AI answer is rejected while the real keyed solver passes.",
       action: async () => {
         await runAttack();
-        setDemoFocus(document.querySelector('.attack-panel'));
+        showView(3);
+        setDemoFocus(document.querySelector('#attackView'));
       }
     }
   ];
@@ -363,7 +376,7 @@ async function startDemoRail() {
       return;
     }
     nextDemoStep();
-  }, 5500);
+  }, 22000);
 }
 
 async function init() {
@@ -379,6 +392,9 @@ async function init() {
 }
 
 els.refreshButton.addEventListener('click', loadClass);
+els.stepTabs.forEach(tab => {
+  tab.addEventListener('click', () => showView(tab.dataset.step));
+});
 els.templateSelect.addEventListener('change', async () => {
   await loadClass();
   await loadSameAnswer();

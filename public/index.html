@@ -7,40 +7,23 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">OpenAI Build Week / Education</p>
-        <h1>Keymark</h1>
-        <p class="tagline">Every answer carries its own proof of origin.</p>
+    <header class="app-shell">
+      <div class="brand-row">
+        <div>
+          <p class="eyebrow">OpenAI Build Week / Education</p>
+          <h1>Keymark</h1>
+          <p class="tagline">Every answer carries its own proof of origin.</p>
+        </div>
+        <div class="runtime">
+          <span class="pulse"></span>
+          Offline deterministic runtime
+        </div>
       </div>
-      <div class="runtime">
-        <span class="pulse"></span>
-        Offline deterministic runtime
-      </div>
-    </header>
 
-    <main>
-      <section class="control-band" aria-label="Assignment controls">
-        <label>
-          Template
-          <select id="templateSelect"></select>
-        </label>
-        <label>
-          Assignment id
-          <input id="assignmentInput" value="build-week-2026-education">
-        </label>
-        <label>
-          Class size
-          <input id="classSizeInput" type="number" min="2" max="12" value="6">
-        </label>
-        <button id="refreshButton" class="primary">Regenerate keyed class</button>
-      </section>
-
-      <section id="demoRail" class="panel demo-rail">
+      <section id="demoRail" class="demo-rail">
         <div>
           <p class="eyebrow">Guided proof rail</p>
-          <h2>Run the Keymark proof sequence</h2>
-          <p id="demoCaption" class="rail-caption">Step through the whole demo path without remembering where to click.</p>
+          <p id="demoCaption" class="rail-caption">Step through the demo one proof at a time.</p>
         </div>
         <div class="rail-actions">
           <button id="demoRailButton" class="primary">Run 90-second proof demo</button>
@@ -48,73 +31,79 @@
         </div>
       </section>
 
-      <section id="sameAnswerSection" class="panel same-answer-panel">
-        <div class="section-title">
-          <div>
-            <p class="eyebrow">Same-answer collision proof</p>
-            <h2>Same answer value, different proof keys</h2>
+      <nav class="stepper" aria-label="Demo steps">
+        <button class="step-tab active" data-step="0"><span>01</span> Problem</button>
+        <button class="step-tab" data-step="1"><span>02</span> Same Answer</button>
+        <button class="step-tab" data-step="2"><span>03</span> Teacher</button>
+        <button class="step-tab" data-step="3"><span>04</span> Attack</button>
+      </nav>
+    </header>
+
+    <main class="stage">
+      <section class="view active" data-view="0" id="problemView">
+        <div class="hero-card">
+          <p class="eyebrow">The failure mode</p>
+          <h2>Proctoring cannot fix a format where the answer is shared.</h2>
+          <p class="lede">Keymark changes the object being graded. The answer must belong to the solver's seeded instance, and the verifier checks that origin deterministically.</p>
+          <div class="claim-grid">
+            <div>
+              <span class="claim-number">0</span>
+              <p>false accusations from AI detection</p>
+            </div>
+            <div>
+              <span class="claim-number">3</span>
+              <p>deterministic templates included</p>
+            </div>
+            <div>
+              <span class="claim-number">1</span>
+              <p>local command to run the whole demo</p>
+            </div>
           </div>
-          <button id="sameAnswerButton">Show same-answer rejection</button>
+        </div>
+
+        <section class="setup-card" aria-label="Assignment controls">
+          <label>
+            Template
+            <select id="templateSelect"></select>
+          </label>
+          <label>
+            Assignment id
+            <input id="assignmentInput" value="build-week-2026-education">
+          </label>
+          <label>
+            Class size
+            <input id="classSizeInput" type="number" min="2" max="12" value="6">
+          </label>
+          <button id="refreshButton" class="primary">Regenerate class</button>
+        </section>
+      </section>
+
+      <section class="view" data-view="1" id="sameAnswerSection">
+        <div class="view-heading">
+          <p class="eyebrow">Same-answer collision proof</p>
+          <h2>Same value. Different proof keys. Transplant rejected.</h2>
+          <p>When two seeded instances collide on the same numeric answer, Keymark still requires the proof key for the target seed.</p>
+          <button id="sameAnswerButton">Refresh deterministic collision</button>
         </div>
         <div id="sameAnswerContent" class="same-answer-content muted">Loading deterministic collision receipt.</div>
       </section>
 
-      <section class="grid two">
-        <div class="panel teacher-panel">
-          <div class="section-title">
-            <div>
-              <p class="eyebrow">Teacher view</p>
-              <h2>Same concept, different seeded instances</h2>
-            </div>
-            <button id="copyRingButton">Simulate copy ring</button>
-          </div>
-          <div id="classGrid" class="student-grid"></div>
-          <div id="copyRingResults" class="results-list"></div>
+      <section class="view" data-view="2" id="teacherView">
+        <div class="view-heading">
+          <p class="eyebrow">Teacher view</p>
+          <h2>One concept becomes a class of keyed instances.</h2>
+          <p>The class sees the same skill, but no shared answer key exists.</p>
+          <button id="copyRingButton" class="primary">Simulate copy ring</button>
         </div>
-
-        <div class="panel student-panel">
-          <div class="section-title">
-            <div>
-              <p class="eyebrow">Student view</p>
-              <h2>Your keyed instance</h2>
-            </div>
-            <button id="loadStudentButton">Load instance</button>
-          </div>
-          <div class="student-controls">
-            <label>
-              Name
-              <input id="studentNameInput" value="Riley Stone">
-            </label>
-            <label>
-              Student id
-              <input id="studentIdInput" value="riley-4402">
-            </label>
-          </div>
-          <div id="studentInstance" class="instance-box muted">Load a keyed instance to begin.</div>
-          <label class="answer-label">
-            Answer
-            <input id="answerInput" placeholder="Type the answer for your instance">
-          </label>
-          <label class="answer-label">
-            Proof key
-            <input id="proofInput" placeholder="Click Seal answer to bind your answer to this seed">
-          </label>
-          <div class="button-row">
-            <button id="sealButton">Seal answer</button>
-            <button id="submitButton" class="primary">Submit to verifier</button>
-            <button id="pasteClassmateButton">Paste classmate answer</button>
-            <button id="fillCorrectButton">Demo-fill real answer</button>
-          </div>
-          <div id="verifyResult" class="receipt"></div>
-        </div>
+        <div id="classGrid" class="student-grid"></div>
+        <div id="copyRingResults" class="results-list"></div>
       </section>
 
-      <section class="panel attack-panel">
-        <div class="section-title">
-          <div>
-            <p class="eyebrow">Attack harness</p>
-            <h2>Let an AI take the shared test</h2>
-          </div>
+      <section class="view" data-view="3" id="attackView">
+        <div class="view-heading">
+          <p class="eyebrow">Attack harness</p>
+          <h2>A generic AI answer is not a keyed answer.</h2>
+          <p>The simulated AI solves the unseeded/shared prompt. The target student needs the answer and proof key for their own seed.</p>
           <button id="attackButton" class="primary">Run transplant attack</button>
         </div>
         <div class="attack-grid">
@@ -127,10 +116,45 @@
             <div id="targetAttack" class="instance-box muted">The target student has a different seeded instance.</div>
           </div>
         </div>
-        <div class="attack-grid">
+        <div class="attack-grid verdict-grid">
           <div id="aiAttempt" class="receipt"></div>
           <div id="realAttempt" class="receipt"></div>
         </div>
+
+        <details class="student-drawer">
+          <summary>Manual student verifier</summary>
+          <div class="student-panel">
+            <div class="student-controls">
+              <label>
+                Name
+                <input id="studentNameInput" value="Riley Stone">
+              </label>
+              <label>
+                Student id
+                <input id="studentIdInput" value="riley-4402">
+              </label>
+              <button id="loadStudentButton">Load instance</button>
+            </div>
+            <div id="studentInstance" class="instance-box muted">Load a keyed instance to begin.</div>
+            <div class="student-controls answer-controls">
+              <label>
+                Answer
+                <input id="answerInput" placeholder="Type the answer for your instance">
+              </label>
+              <label>
+                Proof key
+                <input id="proofInput" placeholder="Click Seal answer to bind your answer to this seed">
+              </label>
+            </div>
+            <div class="button-row">
+              <button id="sealButton">Seal answer</button>
+              <button id="submitButton" class="primary">Submit to verifier</button>
+              <button id="pasteClassmateButton">Paste classmate answer</button>
+              <button id="fillCorrectButton">Demo-fill real answer</button>
+            </div>
+            <div id="verifyResult" class="receipt"></div>
+          </div>
+        </details>
       </section>
     </main>
 

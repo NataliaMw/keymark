@@ -104,9 +104,9 @@ http://localhost:3000/api/same-answer
 
 1. Open the app and keep the default assignment id.
 2. Click `Run 90-second proof demo`.
-3. Step 1 highlights the teacher view: the same template produces different prompts, seed tags, correct answers, and proof keys.
+3. Step 1 shows the problem claim: shared-answer exams are the wrong verification target.
 4. Step 2 highlights the same-answer rejection panel: two students share the same answer value, but the transplanted proof key is rejected.
-5. Step 3 runs the copy ring: every transplanted classmate answer is rejected with a deterministic reason.
+5. Step 3 shows the teacher class and runs the copy ring: every transplanted classmate answer is rejected with a deterministic reason.
 6. Step 4 runs the attack harness: the simulated generic AI answer is rejected while the real keyed solver passes.
 7. In Student view, type an answer manually, click `Seal answer`, then submit to see answer-plus-proof verification.
 8. Click `Demo-fill real answer` to show a passing keyed submission.

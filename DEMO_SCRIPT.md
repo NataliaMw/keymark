@@ -18,7 +18,7 @@ Action: Click `Run 90-second proof demo`.
 
 Voiceover: "Here the teacher assigns one concept to the whole class. But each student gets a keyed instance seeded from their identity and the assignment. Same concept, different numbers, different correct answer, different proof key."
 
-Action: Scroll the Teacher view. Show Ava, Mateo, and Zara side by side. Read two different seed tags and two different correct answers.
+Action: Use `Next proof step` if needed until the Teacher view appears. Show Ava, Mateo, and Zara side by side. Read two different seed tags and two different correct answers.
 
 ## 1:15-1:40 - Same-Answer Rejection
 
