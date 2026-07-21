@@ -1,4 +1,4 @@
-# Keymark — 3-Minute Demo Video (record-ready, learning-first)
+# Aquí Aprenderás — 3-Minute Demo Video (record-ready, learning-first)
 
 **Target: 2:30–2:55.** English required. You do NOT need to speak live or show your face:
 screen-record the product, then lay an **AI voiceover** (ElevenLabs / Narakeet / free Edge TTS)
@@ -11,7 +11,7 @@ browser/incognito window ready to play a student.
 ---
 
 ### 0:00 – 0:22 · The problem  *(landing page on screen)*
-> "When an exam moves online, the questions have one shared answer — so any AI just knows it, and a whole class can score the same. Schools respond with surveillance, which punishes honest students and still doesn't teach anyone anything. Keymark takes the opposite bet: instead of policing the test, it makes the test itself the moment students actually learn."
+> "When an exam moves online, the questions have one shared answer — so any AI just knows it, and a whole class can score the same. Schools respond with surveillance, which punishes honest students and still doesn't teach anyone anything. Aquí Aprenderás takes the opposite bet: instead of policing the test, it makes the test itself the moment students actually learn."
 
 ### 0:22 – 0:38 · The idea  *(read the headline + click "I'm a teacher")*
 > "One exam becomes a personal problem for every student, with instant feedback that explains their own reasoning. Here's how a teacher sets it up."
@@ -23,7 +23,7 @@ browser/incognito window ready to play a student.
 ### 1:05 – 1:55 · The student — the test teaches  *(second window: join with code, get YOUR problem, submit a WRONG answer)*
 > "Every student who joins gets their own version — different numbers, same concept. Watch what happens on a wrong answer."
 [submit a wrong answer — the feedback panel appears]
-> "Not a red X. Keymark shows the goal, then exactly where the reasoning broke on THEIR numbers, then the next step: 'find the margin, divide the setup cost, round up.' That explaining feedback is, in the research, about ten times more effective for learning than a bare right-or-wrong. Then — try a fresh one."
+> "Not a red X. Aquí Aprenderás shows the goal, then exactly where the reasoning broke on THEIR numbers, then the next step: 'find the margin, divide the setup cost, round up.' That explaining feedback is, in the research, about ten times more effective for learning than a bare right-or-wrong. Then — try a fresh one."
 [click "try a fresh one", solve it correctly, mastery meter fills]
 > "A new personalized version, they apply what they just learned, and the mastery meter fills. Struggle became learning, safely."
 
@@ -31,7 +31,7 @@ browser/incognito window ready to play a student.
 > "For the teacher, it's a live mastery dashboard — who's mastered it, who's stuck, which step the class keeps missing — with zero grading. Personalized practice at a scale no teacher could hand-make."
 
 ### 2:20 – 2:45 · How it's built + close
-> "Keymark runs on pure deterministic algorithms — no API calls, no keys at runtime, works fully offline. I used GPT-5.6 to design the keyed-exercise technique and author the templates and reasoning feedback, and Codex to build all of it — the server, the feedback engine, and a self-test that proves it holds. And because every problem is genuinely the student's own, copying simply doesn't work — but that's a side effect of good teaching, not the point. Keymark: the test is where the learning happens."
+> "Aquí Aprenderás runs on pure deterministic algorithms — no API calls, no keys at runtime, works fully offline. I used GPT-5.6 to design the keyed-exercise technique and author the templates and reasoning feedback, and Codex to build all of it — the server, the feedback engine, and a self-test that proves it holds. And because every problem is genuinely the student's own, copying simply doesn't work — but that's a side effect of good teaching, not the point. Aquí Aprenderás: the test is where the learning happens."
 
 ---
 

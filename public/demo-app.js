@@ -323,7 +323,7 @@ function setDemoFocus(element) {
 async function runDemoStep(index) {
   const steps = [
     {
-      caption: '1/4 Problem. Shared-answer exams make copying and generic AI answers look valid; Keymark changes the object being verified.',
+      caption: '1/4 Problem. Shared-answer exams make copying and generic AI answers look valid; Aquí Aprenderás changes the object being verified.',
       action: async () => {
         showView(0);
         setDemoFocus(document.querySelector('#problemView'));

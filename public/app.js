@@ -147,7 +147,7 @@ function setTeacherBoard(board) {
     els.missingStepDetail.textContent = `${board.missingStep.count} missed attempt(s) point here. Use this as tomorrow's mini-lesson.`;
   } else {
     els.missingStep.textContent = 'No missed step yet';
-    els.missingStepDetail.textContent = 'As learners submit, Keymark will surface the reasoning step that needs the most support.';
+    els.missingStepDetail.textContent = 'As learners submit, Aquí Aprenderás will surface the reasoning step that needs the most support.';
   }
 
   if (!board.rows.length) {

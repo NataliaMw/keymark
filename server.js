@@ -418,7 +418,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/health') {
       return sendJSON(res, 200, {
         ok: true,
-        app: 'Keymark',
+        app: 'Aquí Aprenderás',
         tagline: 'One exam, a personal problem for every student, and instant feedback that teaches.',
         runtime: 'pure deterministic algorithms',
         openaiApiAtRuntime: false,
@@ -677,5 +677,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Keymark running at http://localhost:${PORT}`);
+  console.log(`Aquí Aprenderás running at http://localhost:${PORT}`);
 });

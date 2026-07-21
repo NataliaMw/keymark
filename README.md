@@ -1,12 +1,16 @@
-# Keymark
+# Aquí Aprenderás ("here, you will learn")
 
 One exam, a personal problem for every student, and instant feedback that teaches - so the test is where the learning happens.
 
-Keymark is a zero-dependency feedback-and-mastery engine for OpenAI Build Week, Education track. It uses the **Solver-Bound Validity** principle from [CONCEPT.md](./CONCEPT.md): an answer is valid only relative to the solver-specific instance that generated it.
+Aquí Aprenderás is a zero-dependency feedback-and-mastery engine for OpenAI Build Week, Education track. It uses the **Solver-Bound Validity** principle from [CONCEPT.md](./CONCEPT.md): an answer is valid only relative to the solver-specific instance that generated it.
+
+## Inspiration
+
+Aquí Aprenderás was inspired by the school webtoon/live-action drama **True Education** (참교육), which sparked the question of what honest, real education should look like when students can game the system. The answer here is non-punitive: not policing or humiliating students, but redesigning the assignment so the test itself teaches.
 
 ## What It Is
 
-Keymark lets a teacher turn one concept into a learning loop. The teacher names the concept, chooses a deterministic template, and authors the "why" explanation students should learn from. Each student receives a personal seeded instance, submits an answer, and gets elaborated feedback structured around:
+Aquí Aprenderás lets a teacher turn one concept into a learning loop. The teacher names the concept, chooses a deterministic template, and authors the "why" explanation students should learn from. Each student receives a personal seeded instance, submits an answer, and gets elaborated feedback structured around:
 
 - **Feed-Up**: what concept or skill this checks.
 - **Feed-Back**: what happened on this student's specific numbers.
@@ -25,7 +29,7 @@ Copying resistance is a side effect: a transplanted answer fails because the pro
 
 ## Solver-Bound Validity
 
-The Turing test asks "Can a machine pass as human?"; Keymark asks "Does this answer belong to this solver's keyed instance?"
+The Turing test asks "Can a machine pass as human?"; Aquí Aprenderás asks "Does this answer belong to this solver's keyed instance?"
 
 Each item template implements:
 
@@ -45,12 +49,12 @@ The shipped templates cover:
 
 These citations and contrasts are drawn from [CONCEPT.md](./CONCEPT.md):
 
-- Turing, "Computing Machinery and Intelligence" (1950): frames intelligence as indistinguishable imitation; Keymark rejects imitation detection and verifies answer-instance origin by construction.
-- Automatic Item Generation / isomorphic items: psychometrics already generates structurally equivalent item families; Keymark makes the variant identity-bound and self-verifying.
-- PrairieLearn / randomized question generators: randomized parameters plus automated grading are proven instructional patterns; Keymark uses the same determinism for instant feedback and mastery loops.
-- CodeRunner / executable grading: deterministic programmatic grading is valuable; Keymark extends determinism to provenance of the answer-instance match and feedback.
-- Commitment schemes / zero-knowledge: Keymark is not cryptography, but borrows the binding and proof intuition for a simpler educational check.
-- Canary tokens / honeytokens: unique embedded tripwires reveal misuse; Keymark embeds a per-instance fingerprint for deterministic validation.
+- Turing, "Computing Machinery and Intelligence" (1950): frames intelligence as indistinguishable imitation; Aquí Aprenderás rejects imitation detection and verifies answer-instance origin by construction.
+- Automatic Item Generation / isomorphic items: psychometrics already generates structurally equivalent item families; Aquí Aprenderás makes the variant identity-bound and self-verifying.
+- PrairieLearn / randomized question generators: randomized parameters plus automated grading are proven instructional patterns; Aquí Aprenderás uses the same determinism for instant feedback and mastery loops.
+- CodeRunner / executable grading: deterministic programmatic grading is valuable; Aquí Aprenderás extends determinism to provenance of the answer-instance match and feedback.
+- Commitment schemes / zero-knowledge: Aquí Aprenderás is not cryptography, but borrows the binding and proof intuition for a simpler educational check.
+- Canary tokens / honeytokens: unique embedded tripwires reveal misuse; Aquí Aprenderás embeds a per-instance fingerprint for deterministic validation.
 
 ## Honest Limitation
 
