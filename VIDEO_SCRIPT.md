@@ -1,45 +1,42 @@
-# Keymark — 3-Minute Demo Video (record-ready)
+# Keymark — 3-Minute Demo Video (record-ready, learning-first)
 
-**Target length: 2:40–2:55.** Read the voiceover in your own voice — natural, direct, a little passionate. The bracketed lines are what to do on screen. Requirement: the voiceover must clearly say how **Codex** and **GPT-5.6** were used.
+**Target: 2:30–2:55.** English required. You do NOT need to speak live or show your face:
+screen-record the product, then lay an **AI voiceover** (ElevenLabs / Narakeet / free Edge TTS)
+over it using the narration below. Add captions if easy (YouTube auto-captions are fine).
+The voiceover MUST name Codex and GPT-5.6 (it does — don't cut those lines).
 
-Before recording:
-- Run `node server.js`, open `http://localhost:3000` at ~1280–1440px width, browser zoom 100–110%.
-- Have the 4-step nav visible (01 Problem / 02 Same Answer / 03 Teacher / 04 Attack).
-
----
-
-### 0:00 – 0:25 · The problem  *(Step 01 Problem on screen)*
-> "This year, a major public university ran its first big online admission exam. Scores jumped across almost every program, thousands of honest students had their exams voided by AI proctoring, and the whole thing landed in the news. The lesson is simple: you cannot proctor your way out of an exam where the answer is just… the answer. If a question has one shared correct answer, any AI already knows it. So I stopped trying to detect cheating — and changed what gets graded."
-
-### 0:25 – 0:40 · The idea  *(still Step 01 — point to the tagline / stat tiles)*
-> "This is Keymark. The principle is Solver-Bound Validity: every student gets the same concept, but an instance seeded to them — so a correct answer only counts if it carries the proof key for their seed. The Turing test asks if a machine can pass as human. Keymark asks if an answer belongs to you."
-
-### 0:40 – 1:20 · The hard question, answered  *(click Step 02 Same Answer)*
-> "The obvious objection: what if two students get the same answer by chance? Here are two real seeded instances that both solve to thirty-eight thousand eight hundred seventy."
-[point to the two student cards]
-> "Same value — but different seeds, and different required proof keys. Watch a transplant: student one's answer, submitted as student thirteen."
-[point to the ✕ REJECT card]
-> "Rejected. Correct number, wrong proof key. Now student thirteen submits with their own key —"
-[point to the ✓ PASS card]
-> "— accepted. Copying fails even when the answer is identical, because origin is checked, not just correctness. And it's deterministic, so there are zero false accusations."
-
-### 1:20 – 1:55 · At classroom scale  *(click Step 03 Teacher, then click "Simulate copy ring")*
-> "For a teacher it's one click. Same assignment, but every student gets a different seeded instance and a different answer — there's no shared key to leak or buy."
-[click Simulate copy ring]
-> "Run a copy ring across the whole class and every transplanted answer is rejected at once. No webcam, no surveillance, no accusing a kid because their glasses caught the light."
-
-### 1:55 – 2:30 · The attack — AI takes the test  *(click Step 04 Attack, then "Run transplant attack")*
-> "Finally, let an AI take the shared test. On the left, the generic prompt — the model answers it perfectly, like it would ace the old exam."
-[click Run transplant attack; point to REJECT then PASS]
-> "But submitted against a real student's keyed instance: rejected. The same seeded student, using their own proof: passes. The AI having the answer stops being enough."
-
-### 2:30 – 2:55 · How it's built + close
-> "Keymark runs on pure deterministic algorithms — no API calls, no keys at runtime. I used GPT-5.6 to design the Solver-Bound Validity technique and to author the keyed exercise templates and their fingerprint scheme, and I used Codex to build the whole thing — the server, the verifier, the attack harness, and a self-test that proves the transplant defense holds even on answer collisions. Keymark: every answer carries its own proof of origin."
+Setup: `node server.js` → open `http://localhost:3000` at ~1280–1440px. Have a second
+browser/incognito window ready to play a student.
 
 ---
 
-## Recording tips
-- Speed up any loading/typing in edit; cut dead air. Judges may stop at 3:00 — keep it under.
-- Make sure the ✕ REJECT / ✓ PASS moments are on screen while you say them.
-- Export 1080p, upload to YouTube (unlisted is fine), paste the link into Devpost.
-- The voiceover already names Codex and GPT-5.6 — do not cut those two sentences.
+### 0:00 – 0:22 · The problem  *(landing page on screen)*
+> "When an exam moves online, the questions have one shared answer — so any AI just knows it, and a whole class can score the same. Schools respond with surveillance, which punishes honest students and still doesn't teach anyone anything. Keymark takes the opposite bet: instead of policing the test, it makes the test itself the moment students actually learn."
+
+### 0:22 – 0:38 · The idea  *(read the headline + click "I'm a teacher")*
+> "One exam becomes a personal problem for every student, with instant feedback that explains their own reasoning. Here's how a teacher sets it up."
+
+### 0:38 – 1:05 · Teacher designs a learning loop  *(teacher flow: name a concept, pick template, WRITE THE REASONING)*
+> "You don't write thirty questions — you design one concept. Pick the skill, then author the one thing that matters most: the reasoning, the WHY, that every student will get as feedback. Set a mastery goal — pass it twice — and publish. You get a join code to share."
+[show the join code]
+
+### 1:05 – 1:55 · The student — the test teaches  *(second window: join with code, get YOUR problem, submit a WRONG answer)*
+> "Every student who joins gets their own version — different numbers, same concept. Watch what happens on a wrong answer."
+[submit a wrong answer — the feedback panel appears]
+> "Not a red X. Keymark shows the goal, then exactly where the reasoning broke on THEIR numbers, then the next step: 'find the margin, divide the setup cost, round up.' That explaining feedback is, in the research, about ten times more effective for learning than a bare right-or-wrong. Then — try a fresh one."
+[click "try a fresh one", solve it correctly, mastery meter fills]
+> "A new personalized version, they apply what they just learned, and the mastery meter fills. Struggle became learning, safely."
+
+### 1:55 – 2:20 · Teacher dashboard  *(flip to teacher board)*
+> "For the teacher, it's a live mastery dashboard — who's mastered it, who's stuck, which step the class keeps missing — with zero grading. Personalized practice at a scale no teacher could hand-make."
+
+### 2:20 – 2:45 · How it's built + close
+> "Keymark runs on pure deterministic algorithms — no API calls, no keys at runtime, works fully offline. I used GPT-5.6 to design the keyed-exercise technique and author the templates and reasoning feedback, and Codex to build all of it — the server, the feedback engine, and a self-test that proves it holds. And because every problem is genuinely the student's own, copying simply doesn't work — but that's a side effect of good teaching, not the point. Keymark: the test is where the learning happens."
+
+---
+
+## Notes
+- The mechanism explainer lives at `/demo` if you want a 5-second cutaway ("here's the keying under the hood"), but the PRODUCT flow above is the video.
+- Keep it under 3:00 — speed up any typing/loading in edit.
+- Judges include OpenAI's VP of Education — lead with the learning story, which this does.
+- Upload YouTube (unlisted OK) → paste link in Devpost → category **Education** → Session ID `019f82d6-1575-7770-8df1-ccda58628dce`.
