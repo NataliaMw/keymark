@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Keymark</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">OpenAI Build Week / Education</p>
+        <h1>Keymark</h1>
+        <p class="tagline">Every answer carries its own proof of origin.</p>
+      </div>
+      <div class="runtime">
+        <span class="pulse"></span>
+        Offline deterministic runtime
+      </div>
+    </header>
+
+    <main>
+      <section class="control-band" aria-label="Assignment controls">
+        <label>
+          Template
+          <select id="templateSelect"></select>
+        </label>
+        <label>
+          Assignment id
+          <input id="assignmentInput" value="build-week-2026-education">
+        </label>
+        <label>
+          Class size
+          <input id="classSizeInput" type="number" min="2" max="12" value="6">
+        </label>
+        <button id="refreshButton" class="primary">Regenerate keyed class</button>
+      </section>
+
+      <section class="grid two">
+        <div class="panel teacher-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Teacher view</p>
+              <h2>Same concept, different seeded instances</h2>
+            </div>
+            <button id="copyRingButton">Simulate copy ring</button>
+          </div>
+          <div id="classGrid" class="student-grid"></div>
+          <div id="copyRingResults" class="results-list"></div>
+        </div>
+
+        <div class="panel student-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Student view</p>
+              <h2>Your keyed instance</h2>
+            </div>
+            <button id="loadStudentButton">Load instance</button>
+          </div>
+          <div class="student-controls">
+            <label>
+              Name
+              <input id="studentNameInput" value="Riley Stone">
+            </label>
+            <label>
+              Student id
+              <input id="studentIdInput" value="riley-4402">
+            </label>
+          </div>
+          <div id="studentInstance" class="instance-box muted">Load a keyed instance to begin.</div>
+          <label class="answer-label">
+            Answer
+            <input id="answerInput" placeholder="Type the answer for your instance">
+          </label>
+          <label class="answer-label">
+            Proof key
+            <input id="proofInput" placeholder="Click Seal answer to bind your answer to this seed">
+          </label>
+          <div class="button-row">
+            <button id="sealButton">Seal answer</button>
+            <button id="submitButton" class="primary">Submit to verifier</button>
+            <button id="pasteClassmateButton">Paste classmate answer</button>
+            <button id="fillCorrectButton">Demo-fill real answer</button>
+          </div>
+          <div id="verifyResult" class="receipt"></div>
+        </div>
+      </section>
+
+      <section class="panel attack-panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Attack harness</p>
+            <h2>Let an AI take the shared test</h2>
+          </div>
+          <button id="attackButton" class="primary">Run transplant attack</button>
+        </div>
+        <div class="attack-grid">
+          <div>
+            <h3>Generic prompt answer</h3>
+            <div id="genericAttack" class="instance-box muted">Run the harness to simulate the generic answer.</div>
+          </div>
+          <div>
+            <h3>Keyed student answer</h3>
+            <div id="targetAttack" class="instance-box muted">The target student has a different seeded instance.</div>
+          </div>
+        </div>
+        <div class="attack-grid">
+          <div id="aiAttempt" class="receipt"></div>
+          <div id="realAttempt" class="receipt"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Solver-Bound Validity</span>
+      <span class="hashline">answer + seed -> proof receipt</span>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
