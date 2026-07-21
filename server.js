@@ -153,6 +153,91 @@ function copyRing(templateId, assignmentId, count) {
   });
 }
 
+function findSameAnswerPair(templateId, assignmentId, limit) {
+  const template = getTemplate(templateId);
+  const seen = new Map();
+  const max = Math.max(50, Math.min(6000, Number(limit) || 5000));
+  for (let i = 1; i <= max; i++) {
+    const studentId = `student-${String(i).padStart(4, '0')}`;
+    const studentName = `Student ${i}`;
+    const instance = buildInstance(template.id, assignmentId, studentId, studentName);
+    const answer = template.solve(instance);
+    const canonical = template.canonicalAnswer(answer, instance);
+    if (seen.has(canonical)) {
+      return {
+        template,
+        first: seen.get(canonical),
+        second: { studentId, studentName, instance, answer, canonical }
+      };
+    }
+    seen.set(canonical, { studentId, studentName, instance, answer, canonical });
+  }
+  return null;
+}
+
+function sameAnswerDemo(templateId) {
+  const requestedTemplate = getTemplate(templateId);
+  const collisionAssignment = 'selftest-answer-separation';
+  const found = findSameAnswerPair(requestedTemplate.id, collisionAssignment, 5000)
+    || findSameAnswerPair(DEFAULT_TEMPLATE, collisionAssignment, 5000);
+  if (!found) throw new Error('No deterministic same-answer pair found');
+
+  const template = found.template;
+  const firstProofKey = proofKey(template, found.first.answer, found.first.instance);
+  const secondProofKey = proofKey(template, found.second.answer, found.second.instance);
+  const known = [
+    { label: found.first.studentName, instance: found.first.instance },
+    { label: found.second.studentName, instance: found.second.instance }
+  ];
+  const transplant = verifyAnswer(
+    template.id,
+    { answer: found.first.answer, proofKey: firstProofKey },
+    found.second.instance,
+    { knownInstances: known }
+  );
+  const legitimate = verifyAnswer(
+    template.id,
+    { answer: found.second.answer, proofKey: secondProofKey },
+    found.second.instance,
+    { knownInstances: known }
+  );
+
+  return {
+    label: 'Same answer, different required proof keys',
+    note: requestedTemplate.id === template.id
+      ? 'Deterministic search found two real seeded instances for the selected template with the same answer value.'
+      : 'The selected template did not collide within the deterministic search window, so this panel uses the stable math collision fixture.',
+    assignmentId: collisionAssignment,
+    template: templateSummaries().find(item => item.id === template.id),
+    sharedAnswer: template.displayAnswer(found.first.answer, found.first.instance),
+    students: [
+      {
+        label: found.first.studentName,
+        instance: publicInstance(template, found.first.instance, true),
+        proofKey: firstProofKey
+      },
+      {
+        label: found.second.studentName,
+        instance: publicInstance(template, found.second.instance, true),
+        proofKey: secondProofKey
+      }
+    ],
+    transplant: {
+      submittedFrom: found.first.studentName,
+      submittedTo: found.second.studentName,
+      submittedAnswer: template.displayAnswer(found.first.answer, found.first.instance),
+      submittedProofKey: firstProofKey,
+      verification: transplant
+    },
+    legitimate: {
+      submittedBy: found.second.studentName,
+      submittedAnswer: template.displayAnswer(found.second.answer, found.second.instance),
+      submittedProofKey: secondProofKey,
+      verification: legitimate
+    }
+  };
+}
+
 function attackHarness(templateId, assignmentId, studentId, studentName) {
   const template = getTemplate(templateId);
   const target = buildInstance(template.id, assignmentId, studentId, studentName);
@@ -278,6 +363,11 @@ const server = http.createServer(async (req, res) => {
         template: templateSummaries().find(item => item.id === getTemplate(templateId).id),
         results: copyRing(templateId, assignmentId, url.searchParams.get('count'))
       });
+    }
+
+    if (pathname === '/api/same-answer' && req.method === 'GET') {
+      const templateId = url.searchParams.get('templateId') || DEFAULT_TEMPLATE;
+      return sendJSON(res, 200, sameAnswerDemo(templateId));
     }
 
     if (pathname === '/api/attack' && req.method === 'GET') {

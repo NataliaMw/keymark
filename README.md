@@ -94,19 +94,22 @@ Browser-readable self-test:
 http://localhost:3000/api/selftest
 ```
 
+Same-answer rejection proof:
+
+```text
+http://localhost:3000/api/same-answer
+```
+
 ## Demo Flow
 
 1. Open the app and keep the default assignment id.
-2. In Teacher view, compare the class cards: the same template produces different prompts, seed tags, correct answers, and proof keys.
-3. Click `Simulate copy ring`.
-4. Observe that every transplanted classmate answer is rejected with a deterministic reason.
-5. In Student view, click `Paste classmate answer`.
-6. The verifier rejects the answer because its proof key belongs to a different seeded instance.
-7. Type an answer manually, click `Seal answer`, then submit to see answer-plus-proof verification.
-8. Click `Demo-fill real answer`.
-9. The verifier accepts the answer and proof key for that student's seed.
-10. Click `Run transplant attack`.
-11. The simulated generic AI answer is rejected, while the real keyed solver answer passes.
+2. Click `Run 90-second proof demo`.
+3. Step 1 highlights the teacher view: the same template produces different prompts, seed tags, correct answers, and proof keys.
+4. Step 2 highlights the same-answer rejection panel: two students share the same answer value, but the transplanted proof key is rejected.
+5. Step 3 runs the copy ring: every transplanted classmate answer is rejected with a deterministic reason.
+6. Step 4 runs the attack harness: the simulated generic AI answer is rejected while the real keyed solver passes.
+7. In Student view, type an answer manually, click `Seal answer`, then submit to see answer-plus-proof verification.
+8. Click `Demo-fill real answer` to show a passing keyed submission.
 
 ## Tech Stack
 

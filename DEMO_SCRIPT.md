@@ -12,7 +12,7 @@ Action: Open `http://localhost:3000`. Show the Keymark title and offline determi
 
 Voiceover: "Keymark uses Solver-Bound Validity. The answer is valid only relative to the solver-specific instance that generated it. Every answer carries its own proof of origin."
 
-Action: Point to the template picker and assignment id. Leave the default assignment selected.
+Action: Click `Run 90-second proof demo`.
 
 ## 0:45-1:15 - Teacher View
 
@@ -20,25 +20,31 @@ Voiceover: "Here the teacher assigns one concept to the whole class. But each st
 
 Action: Scroll the Teacher view. Show Ava, Mateo, and Zara side by side. Read two different seed tags and two different correct answers.
 
-## 1:15-1:40 - Copy Ring
+## 1:15-1:40 - Same-Answer Rejection
+
+Voiceover: "Here is the credibility test: what if two students get the same answer value? Keymark still rejects a transplant because the required proof key belongs to the other seed."
+
+Action: Show the same-answer panel. Read the shared answer value, the two different seed tags, and the red rejection receipt.
+
+## 1:40-2:05 - Copy Ring
 
 Voiceover: "Now simulate a copy ring. Every student pastes a classmate's answer. The verifier does not accuse anyone. It just runs the deterministic solver for that student's seed."
 
 Action: Click `Simulate copy ring`. Show the rejection reasons: each pasted answer is correct for another seed, not the target student's seed.
 
-## 1:40-2:15 - Attack Harness
+## 2:05-2:30 - Attack Harness
 
 Voiceover: "Now let an AI take it. This is an offline simulation: no model is called at runtime. The simulated AI receives the generic shared prompt and returns the correct generic answer. That answer would ace a shared exam. But submitted against Riley's keyed instance, it is rejected."
 
 Action: Click `Run transplant attack`. Show the generic answer on the left, Riley's keyed instance on the right, and the AI attempt rejection receipt.
 
-## 2:15-2:40 - Real Solver Passes
+## 2:30-2:45 - Real Solver Passes
 
 Voiceover: "A real solver who answers Riley's actual keyed instance passes. The proof key recomputes from Riley's seed and answer. The check is arithmetic, not a guess about intent."
 
 Action: In Student view, click `Demo-fill real answer`. Show the PASS receipt and proof key.
 
-## 2:40-2:55 - Build Week Use
+## 2:45-2:55 - Build Week Use
 
 Voiceover: "GPT-5.6 designed the Solver-Bound Validity framing, the keyed item templates, and the fingerprint scheme. Codex built the zero-dependency Node server, deterministic verifier, vanilla UI, copy-ring simulation, and attack harness."
 

@@ -1,7 +1,9 @@
 const state = {
   templates: [],
   classView: null,
-  studentSolution: null
+  studentSolution: null,
+  demoStep: -1,
+  demoTimer: null
 };
 
 const els = {
@@ -9,6 +11,13 @@ const els = {
   assignmentInput: document.querySelector('#assignmentInput'),
   classSizeInput: document.querySelector('#classSizeInput'),
   refreshButton: document.querySelector('#refreshButton'),
+  demoRail: document.querySelector('#demoRail'),
+  demoRailButton: document.querySelector('#demoRailButton'),
+  demoNextButton: document.querySelector('#demoNextButton'),
+  demoCaption: document.querySelector('#demoCaption'),
+  sameAnswerSection: document.querySelector('#sameAnswerSection'),
+  sameAnswerButton: document.querySelector('#sameAnswerButton'),
+  sameAnswerContent: document.querySelector('#sameAnswerContent'),
   classGrid: document.querySelector('#classGrid'),
   copyRingButton: document.querySelector('#copyRingButton'),
   copyRingResults: document.querySelector('#copyRingResults'),
@@ -100,6 +109,20 @@ function renderReceipt(target, result) {
   `;
 }
 
+function receiptHTML(result) {
+  return `
+    <div class="receipt ${statusClass(result.valid)}">
+      <div class="receipt-head">
+        <strong>${result.valid ? 'PASS' : 'REJECT'}</strong>
+        <span>${escapeHTML(result.expectedAnswer || '')}</span>
+      </div>
+      <p>${escapeHTML(result.reason)}</p>
+      ${result.proofKey || result.expectedProofKey ? `<code>${escapeHTML(result.proofKey || result.expectedProofKey)}</code>` : ''}
+      ${result.explanation ? `<p class="receipt-note">${escapeHTML(result.explanation)}</p>` : ''}
+    </div>
+  `;
+}
+
 async function loadTemplates() {
   const data = await api('/api/templates');
   state.templates = data.templates;
@@ -118,6 +141,53 @@ async function loadClass() {
     </article>
   `).join('');
   els.copyRingResults.innerHTML = '';
+}
+
+async function loadSameAnswer() {
+  const params = new URLSearchParams({ templateId: selectedTemplate() });
+  const data = await api(`/api/same-answer?${params.toString()}`);
+  const [first, second] = data.students;
+  els.sameAnswerContent.classList.remove('muted');
+  els.sameAnswerContent.innerHTML = `
+    <div class="collision-banner">
+      <span>Both seeded instances solve to</span>
+      <strong>${escapeHTML(data.sharedAnswer)}</strong>
+      <span>but the proof keys are not interchangeable.</span>
+    </div>
+    <div class="same-answer-grid">
+      <article class="collision-card">
+        <h3>${escapeHTML(first.label)}</h3>
+        <div class="keyline"><span>Seed</span><code>${escapeHTML(first.instance.seedTag)}</code></div>
+        <div class="keyline"><span>Answer</span><strong>${escapeHTML(first.instance.correctAnswer)}</strong></div>
+        <div class="keyline"><span>Required proof</span><code>${escapeHTML(first.proofKey)}</code></div>
+      </article>
+      <article class="collision-card">
+        <h3>${escapeHTML(second.label)}</h3>
+        <div class="keyline"><span>Seed</span><code>${escapeHTML(second.instance.seedTag)}</code></div>
+        <div class="keyline"><span>Answer</span><strong>${escapeHTML(second.instance.correctAnswer)}</strong></div>
+        <div class="keyline"><span>Required proof</span><code>${escapeHTML(second.proofKey)}</code></div>
+      </article>
+    </div>
+    <div class="transplant-strip">
+      <div>
+        <p class="eyebrow">Transplant attempt</p>
+        <h3>${escapeHTML(data.transplant.submittedFrom)} -> ${escapeHTML(data.transplant.submittedTo)}</h3>
+        <p>Submitted value: <strong>${escapeHTML(data.transplant.submittedAnswer)}</strong></p>
+        <code>${escapeHTML(data.transplant.submittedProofKey)}</code>
+      </div>
+      ${receiptHTML(data.transplant.verification)}
+    </div>
+    <div class="transplant-strip legitimate">
+      <div>
+        <p class="eyebrow">Legitimate submission</p>
+        <h3>${escapeHTML(data.legitimate.submittedBy)} uses their own proof key</h3>
+        <p>Submitted value: <strong>${escapeHTML(data.legitimate.submittedAnswer)}</strong></p>
+        <code>${escapeHTML(data.legitimate.submittedProofKey)}</code>
+      </div>
+      ${receiptHTML(data.legitimate.verification)}
+    </div>
+    <p class="small">${escapeHTML(data.note)}</p>
+  `;
 }
 
 async function loadStudent(solution) {
@@ -233,10 +303,74 @@ async function runAttack() {
   renderReceipt(els.realAttempt, data.realAttempt);
 }
 
+function setDemoFocus(element) {
+  document.querySelectorAll('.demo-focus').forEach(node => node.classList.remove('demo-focus'));
+  if (element) {
+    element.classList.add('demo-focus');
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+async function runDemoStep(index) {
+  const steps = [
+    {
+      caption: '1/4 Same concept, different keyed instances. Notice every student has a different seed, prompt, answer, and proof key.',
+      action: async () => {
+        await loadClass();
+        setDemoFocus(document.querySelector('.teacher-panel'));
+      }
+    },
+    {
+      caption: '2/4 Collision defense. Even when two students have the same answer value, the wrong seed proof key is rejected.',
+      action: async () => {
+        await loadSameAnswer();
+        setDemoFocus(els.sameAnswerSection);
+      }
+    },
+    {
+      caption: '3/4 Copy ring. Every transplanted classmate answer fails deterministic verification.',
+      action: async () => {
+        await runCopyRing();
+        setDemoFocus(document.querySelector('.teacher-panel'));
+      }
+    },
+    {
+      caption: "4/4 Attack harness. The generic AI answer is rejected while the real keyed solver passes.",
+      action: async () => {
+        await runAttack();
+        setDemoFocus(document.querySelector('.attack-panel'));
+      }
+    }
+  ];
+  state.demoStep = index % steps.length;
+  const step = steps[state.demoStep];
+  els.demoCaption.textContent = step.caption;
+  await step.action();
+}
+
+async function nextDemoStep() {
+  await runDemoStep(state.demoStep + 1);
+}
+
+async function startDemoRail() {
+  clearInterval(state.demoTimer);
+  state.demoStep = -1;
+  await nextDemoStep();
+  state.demoTimer = setInterval(() => {
+    if (state.demoStep >= 3) {
+      clearInterval(state.demoTimer);
+      els.demoCaption.textContent = 'Proof sequence complete: seeded instances, collision rejection, copy-ring rejection, and generic-AI rejection.';
+      return;
+    }
+    nextDemoStep();
+  }, 5500);
+}
+
 async function init() {
   try {
     await loadTemplates();
     await loadClass();
+    await loadSameAnswer();
     await loadStudent(false);
     await runAttack();
   } catch (err) {
@@ -247,9 +381,13 @@ async function init() {
 els.refreshButton.addEventListener('click', loadClass);
 els.templateSelect.addEventListener('change', async () => {
   await loadClass();
+  await loadSameAnswer();
   await loadStudent(false);
   await runAttack();
 });
+els.demoRailButton.addEventListener('click', startDemoRail);
+els.demoNextButton.addEventListener('click', nextDemoStep);
+els.sameAnswerButton.addEventListener('click', loadSameAnswer);
 els.copyRingButton.addEventListener('click', runCopyRing);
 els.loadStudentButton.addEventListener('click', () => loadStudent(false));
 els.sealButton.addEventListener('click', sealCurrentAnswer);

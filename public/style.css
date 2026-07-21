@@ -168,6 +168,113 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+.demo-rail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  border-color: rgba(49, 95, 125, 0.35);
+  background: linear-gradient(135deg, rgba(238, 246, 247, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.rail-caption {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.rail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.same-answer-panel {
+  margin-top: 18px;
+}
+
+.same-answer-content {
+  display: grid;
+  gap: 12px;
+}
+
+.collision-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 82px;
+  padding: 16px;
+  border: 1px solid rgba(49, 95, 125, 0.22);
+  border-radius: 8px;
+  background: #f3faf8;
+  color: var(--muted);
+  text-align: center;
+}
+
+.collision-banner strong {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: clamp(1.8rem, 5vw, 3.4rem);
+  letter-spacing: 0;
+}
+
+.same-answer-grid,
+.transplant-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.collision-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.keyline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #e8eeee;
+}
+
+.keyline span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.transplant-strip {
+  align-items: stretch;
+  padding: 12px;
+  border: 1px solid rgba(168, 62, 62, 0.25);
+  border-radius: 8px;
+  background: #fff8f6;
+}
+
+.transplant-strip.legitimate {
+  border-color: rgba(20, 120, 95, 0.25);
+  background: #f5fbf8;
+}
+
+.transplant-strip .receipt {
+  margin-top: 0;
+}
+
+.demo-focus {
+  outline: 3px solid rgba(49, 95, 125, 0.42);
+  outline-offset: 5px;
+}
+
 .grid {
   display: grid;
   gap: 18px;
@@ -400,9 +507,17 @@ footer {
 
 @media (max-width: 1100px) {
   .control-band,
+  .demo-rail,
+  .same-answer-grid,
+  .transplant-strip,
   .grid.two,
   .attack-grid {
     grid-template-columns: 1fr;
+  }
+
+  .demo-rail {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .student-grid {
