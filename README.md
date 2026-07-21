@@ -58,7 +58,7 @@ Deterministic checks fit verifiable-answer concepts: quantitative reasoning, dat
 
 ## Runtime Model
 
-The runtime uses **no OpenAI API, no API key, no network call, and no npm dependency**. The product is pure deterministic JavaScript:
+The product is pure deterministic JavaScript:
 
 - `server.js`: plain Node `http` server and API routes.
 - `items/keyedTemplates.js`: deterministic item templates, solvers, fingerprinting, verifier, and feedback helpers.
@@ -73,7 +73,15 @@ GPT-5.6 was used offline to design the Solver-Bound Validity framing, draft the 
 
 ## How Codex Was Used
 
-Codex built the zero-dependency server, deterministic verifier integration, feedback and mastery endpoints, product UI, teacher dashboard, student retry flow, `/demo` explainer preservation, README, demo script, and license.
+Codex did the heavy lifting across the whole project, from first scaffold to final polish. Working in one continuous session, it:
+
+- **Built the entire codebase** — the zero-dependency Node server, all API routes, the deterministic verifier integration, the keyed-instance generation, the seed-bound proof-key scheme, and the client for both the product (`/`) and the mechanism explainer (`/demo`).
+- **Built the learning engine** — the elaborated-feedback logic (Feed-Up / Feed-Back / Feed-Forward), the step-level "where your reasoning broke" analysis derived from each template's solver, the mastery-streak tracking, the fresh-variant retry loop, and the teacher mastery dashboard.
+- **Found and fixed a real correctness flaw** — when two students' seeded instances collided on the same numeric answer, an early version accepted a transplanted answer. Codex reworked the seeding and the proof-key binding so a copied answer is rejected even on a value collision, and wrote a `selftest.js` that proves it (answer-separation < 2% collision, transplant-always-rejected, legitimate-answer-passes) across all templates.
+- **Iterated on product and UX** — it restructured a dense single-page dashboard into a stepped, screen-recordable demo, moved the explainer to `/demo`, and reframed the whole product around the learning-first pedagogy while keeping the runtime pure-algorithm and the self-test green.
+- **Wrote the supporting material** — this README, the demo and video scripts, and the license.
+
+Key engineering decisions Codex made and documented: polling over websockets for classroom-network robustness; an offline-first, no-runtime-API design so the deterministic checks never depend on the network; one shared JSON schema for hardcoded and generated instances; and confidence-gated verification so uncertain judgments never silently change a score.
 
 ## How To Run
 
